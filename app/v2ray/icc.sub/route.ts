@@ -1,5 +1,5 @@
 export async function GET() {
-    const publicUrls =
+    const publicUrlGroups =
         [
             [
                 'https://gitlab.com/zhifan999/fq/-/wikis/v2ray%E5%85%8D%E8%B4%B9%E8%B4%A6%E5%8F%B7',
@@ -22,12 +22,12 @@ export async function GET() {
         ]
 
     const allPromises: Promise<Response>[] = [];
-    for (const publicUrl of publicUrls) {
-        if (publicUrl.length <= 0) {
+    for (const publicUrlGroup of publicUrlGroups) {
+        if (publicUrlGroup.length <= 0) {
             continue;
         }
-        const randomIndex = Math.floor(Math.random() * publicUrl.length);
-        allPromises.push(fetch(publicUrl[randomIndex], { signal: AbortSignal.timeout(3000) }));
+        const randomIndex = Math.floor(Math.random() * publicUrlGroup.length);
+        allPromises.push(fetch(publicUrlGroup[randomIndex], { signal: AbortSignal.timeout(3000) }));
     }
 
     const re = /("|n|>)((vmess|vless|ssr|ss):\/\/[^"\\<]+)/g;
@@ -54,7 +54,7 @@ export async function GET() {
     }
     allGWFEscapeUrls = Array.from(new Set(allGWFEscapeUrls));
 
-    const responseText = allGWFEscapeUrls.join("\n");
+    const responseText = Buffer.from(allGWFEscapeUrls.join("\n"), 'utf-8').toString('base64');
 
     return new Response(
         responseText,
