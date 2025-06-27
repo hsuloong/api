@@ -1,3 +1,5 @@
+import { GetChromeHeaders } from "@/app/lib/web_api_configs";
+
 export async function GET() {
     const publicUrlGroups =
         [
@@ -21,11 +23,11 @@ export async function GET() {
             ],
         ];
 
-    // const subUrls = [
-    //     "https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2"
-    // ];
+    const subUrls = [
+        "https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2"
+    ];
 
-    const maxTimeout = 3000;
+    const MAX_TIMEOUT = 3000;
 
     const allPublicPromises: Promise<Response>[] = [];
     for (const publicUrlGroup of publicUrlGroups) {
@@ -33,16 +35,16 @@ export async function GET() {
             continue;
         }
         const randomIndex = Math.floor(Math.random() * publicUrlGroup.length);
-        allPublicPromises.push(fetch(publicUrlGroup[randomIndex], { signal: AbortSignal.timeout(maxTimeout) }));
+        allPublicPromises.push(fetch(publicUrlGroup[randomIndex], { signal: AbortSignal.timeout(MAX_TIMEOUT), headers: { ...GetChromeHeaders() } }));
     }
 
-    // const allSubPromises: Promise<Response>[] = [];
-    // for (const subUrl of subUrls) {
-    //     if (subUrls.length <= 0) {
-    //         continue;
-    //     }
-    //     allSubPromises.push(fetch(subUrl, { signal: AbortSignal.timeout(maxTimeout) }));
-    // }
+    const allSubPromises: Promise<Response>[] = [];
+    for (const subUrl of subUrls) {
+        if (subUrls.length <= 0) {
+            continue;
+        }
+        allSubPromises.push(fetch(subUrl, { signal: AbortSignal.timeout(MAX_TIMEOUT) }));
+    }
 
     const re = /("|n|>)((vmess|vless|ssr|ss):\/\/[^"\\<]+)/g;
     let allGWFEscapeUrls: string[] = [];
@@ -67,19 +69,19 @@ export async function GET() {
         }
     }
 
-    // for (const onePromise of allSubPromises) {
-    //     try {
-    //         const htmlResponse = await onePromise;
-    //         if (!htmlResponse.ok) {
-    //             continue;
-    //         }
+    for (const onePromise of allSubPromises) {
+        try {
+            const htmlResponse = await onePromise;
+            if (!htmlResponse.ok) {
+                continue;
+            }
 
-    //         const htmlText = Buffer.from((await htmlResponse.text()), 'base64').toString('utf-8');
-    //         allGWFEscapeUrls.push(...htmlText.split('\n'));
-    //     } catch (error) {
-    //         console.error('Error fetching URL:', error);
-    //     }
-    // }
+            const htmlText = Buffer.from((await htmlResponse.text()), 'base64').toString('utf-8');
+            allGWFEscapeUrls.push(...htmlText.split('\n'));
+        } catch (error) {
+            console.error('Error fetching URL:', error);
+        }
+    }
 
     allGWFEscapeUrls = Array.from(new Set(allGWFEscapeUrls));
 
