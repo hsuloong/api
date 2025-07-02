@@ -46,7 +46,7 @@ export async function GET() {
         allSubPromises.push(fetch(subUrl, { signal: AbortSignal.timeout(MAX_TIMEOUT) }));
     }
 
-    const re = /("|n|>)((vmess|vless|ssr|ss):\/\/[^"\\<]+)/g;
+    const re = /("|n|>)((vmess|vless|ssr|ss|hysteria2):\/\/[^"\\<]+)/g;
     let allGWFEscapeUrls: string[] = [];
 
     for (const onePromise of allPublicPromises) {
@@ -56,7 +56,7 @@ export async function GET() {
                 continue;
             }
 
-            const htmlText = (await htmlResponse.text()).replaceAll('\\u0026', '&').replaceAll('&amp;', '&');
+            const htmlText = (await htmlResponse.text()).replaceAll('\\u0026', '&').replaceAll('&amp;', '&').replaceAll('<pre>', 'mask');
             const htmlMatches = htmlText.matchAll(re);
             for (const htmlMatche of htmlMatches) {
                 if (htmlMatche.length <= 2) {
